@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Checkout | SBN Store{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl font-extrabold text-primary tracking-tight mb-6">{% trans "Checkout" %}</h1>
+
+    <form method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {% csrf_token %}
+        <!-- Left: Shipping Form -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Shipping Address -->
+            <div class="card-elevated shadow-sm p-6">
+                <h2 class="font-bold text-on-surface text-lg mb-5 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {% trans "Alamat Pengiriman" %}
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% for field in form %}
+                        {% if field.name != 'payment_method' and field.name != 'notes' %}
+                        <div class="{% if field.name == 'address' %}sm:col-span-2{% endif %}">
+                            <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ field.label }}{% if field.field.required %}<span class="text-red-400 ml-0.5">*</span>{% endif %}</label>
+                            <div class="[&>input]:w-full [&>input]:px-4 [&>input]:py-2.5 [&>input]:rounded-xl [&>input]:border [&>input]:border-surface-container [&>input]:focus:outline-none [&>input]:focus:ring-2 [&>input]:focus:ring-secondary/30 [&>input]:text-on-surface [&>textarea]:w-full [&>textarea]:px-4 [&>textarea]:py-2.5 [&>textarea]:rounded-xl [&>textarea]:border [&>textarea]:border-surface-container [&>textarea]:focus:outline-none [&>textarea]:focus:ring-2 [&>textarea]:focus:ring-secondary/30 [&>textarea]:text-on-surface [&>textarea]:resize-none [&>select]:w-full [&>select]:px-4 [&>select]:py-2.5 [&>select]:rounded-xl [&>select]:border [&>select]:border-surface-container [&>select]:focus:outline-none [&>select]:focus:ring-2 [&>select]:focus:ring-secondary/30 [&>select]:text-on-surface [&>select]:bg-white [&>select]:appearance-none">
+                                {{ field }}
+                            </div>
+                            {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card-elevated shadow-sm p-6">
+                <h2 class="font-bold text-on-surface text-base mb-3">{% trans "Catatan Pesanan (opsional)" %}</h2>
+                <div class="[&>textarea]:w-full [&>textarea]:px-4 [&>textarea]:py-2.5 [&>textarea]:rounded-xl [&>textarea]:border [&>textarea]:border-surface-container [&>textarea]:focus:outline-none [&>textarea]:focus:ring-2 [&>textarea]:focus:ring-secondary/30 [&>textarea]:text-on-surface [&>textarea]:resize-none">
+                    {{ form.notes }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="card-elevated shadow-sm p-6 sticky top-24">
+                <h2 class="font-bold text-on-surface text-lg mb-4">{% trans "Pesanan" %}</h2>
+                <div class="space-y-3 mb-4">
+                    {% for item in items %}
+                    <div class="flex gap-3">
+                        {% if item.furniture.thumbnail %}
+                        <img src="{{ item.furniture.thumbnail.url }}" alt="" class="w-12 h-12 object-cover rounded-lg flex-shrink-0">
+                        {% endif %}
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium text-on-surface truncate">{{ item.furniture.name }}</div>
+                            {% if item.variant %}<div class="text-xs text-on-surface/30">{% trans "Varian:" %} {{ item.variant.name }}</div>{% endif %}
+                            <div class="text-xs text-on-surface/50">×{{ item.quantity }} = <span class="font-semibold text-on-surface/70">Rp {{ item.get_subtotal }}</span></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="border-t border-surface-container-high pt-4 mb-5">
+                    <div class="flex justify-between font-bold text-on-surface">
+                        <span>{% trans "Total" %}</span>
+                        <span class="text-secondary text-lg">{{ formatted_total }}</span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white rounded-xl hover:bg-opacity-90 transition-all py-3 px-4 shadow-sm font-bold flex justify-center items-center gap-2">
+                    {% trans "Lanjut Bayar dengan Xendit" %} <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+                <a href="{% url 'cart' %}" class="block text-center text-sm text-on-surface/30 hover:text-on-surface/60 mt-3 transition-colors">← {% trans "Kembali ke Keranjang" %}</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const provinceSel = document.getElementById('id_province');
+    const citySel = document.getElementById('id_city');
+    const districtSel = document.getElementById('id_district');
+    const villageSel = document.getElementById('id_village');
+    
+    if(!provinceSel || !citySel || !districtSel || !villageSel) return;
+
+    const API_BASE = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+
+    function toTitleCase(str) {
+        if (!str) return '';
+        str = str.replace(/B A T A M/ig, 'BATAM');
+        return str.toLowerCase().split(' ').map(function(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
+    }
+
+    function fetchAndPopulate(url, selectElement, defaultText, callback) {
+        selectElement.innerHTML = `<option value="">Memuat...</option>`;
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+                const initialVal = selectElement.getAttribute('data-initial') || '';
+                let foundMatch = null;
+                data.forEach(item => {
+                    const opt = document.createElement('option');
+                    const titleName = toTitleCase(item.name);
+                    opt.value = titleName;
+                    opt.setAttribute('data-id', item.id);
+                    opt.textContent = titleName;
+                    if(titleName.toUpperCase() === initialVal.toUpperCase()) {
+                        opt.selected = true;
+                        foundMatch = item;
+                    }
+                    selectElement.appendChild(opt);
+                });
+                if(callback && foundMatch) {
+                    callback(foundMatch.id);
+                }
+            })
+            .catch(err => {
+                selectElement.innerHTML = `<option value="">Gagal memuat data</option>`;
+                console.error(err);
+            });
+    }
+
+    // Handlers
+    provinceSel.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const id = opt ? opt.getAttribute('data-id') : null;
+        citySel.innerHTML = `<option value="">Pilih Kota/Kabupaten...</option>`;
+        districtSel.innerHTML = `<option value="">Pilih Kecamatan...</option>`;
+        villageSel.innerHTML = `<option value="">Pilih Kelurahan/Desa...</option>`;
+        if(id) {
+            fetchAndPopulate(`${API_BASE}/regencies/${id}.json`, citySel, 'Pilih Kota/Kabupaten...');
+        }
+    });
+
+    citySel.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const id = opt ? opt.getAttribute('data-id') : null;
+        districtSel.innerHTML = `<option value="">Pilih Kecamatan...</option>`;
+        villageSel.innerHTML = `<option value="">Pilih Kelurahan/Desa...</option>`;
+        if(id) {
+            fetchAndPopulate(`${API_BASE}/districts/${id}.json`, districtSel, 'Pilih Kecamatan...');
+        }
+    });
+
+    districtSel.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const id = opt ? opt.getAttribute('data-id') : null;
+        villageSel.innerHTML = `<option value="">Pilih Kelurahan/Desa...</option>`;
+        if(id) {
+            fetchAndPopulate(`${API_BASE}/villages/${id}.json`, villageSel, 'Pilih Kelurahan/Desa...');
+        }
+    });
+
+    // Initial Load - Provinces
+    fetchAndPopulate(`${API_BASE}/provinces.json`, provinceSel, 'Pilih Provinsi...', function(provId) {
+        if(citySel.getAttribute('data-initial')) {
+            fetchAndPopulate(`${API_BASE}/regencies/${provId}.json`, citySel, 'Pilih Kota/Kabupaten...', function(cityId) {
+                if(districtSel.getAttribute('data-initial')) {
+                    fetchAndPopulate(`${API_BASE}/districts/${cityId}.json`, districtSel, 'Pilih Kecamatan...', function(distId) {
+                        if(villageSel.getAttribute('data-initial')) {
+                            fetchAndPopulate(`${API_BASE}/villages/${distId}.json`, villageSel, 'Pilih Kelurahan/Desa...');
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

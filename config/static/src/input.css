@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Tonal Surface CSS Custom Properties */
+  :root {
+    --surface: #f2fbff;
+    --surface-dim: #bde0ed;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #e4f7ff;
+    --surface-container: #d5f3ff;
+    --surface-container-high: #cbeefc;
+    --surface-container-highest: #c5e8f6;
+    --on-surface: #001f28;
+    --primary: #3498db;
+    --primary-container: #2980b9;
+    --secondary: #1a3c47;
+    --outline-variant: #bfc7d2;
+    --glass-bg: rgba(242, 251, 255, 0.70);
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Glassmorphism panel */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Card with ambient shadow - replaces border-based cards */
+  .card-elevated {
+    background: var(--surface-container-lowest);
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0,31,40,0.06);
+    border: none;
+  }
+
+  /* Ghost border - barely visible boundary */
+  .ghost-border {
+    border: 1px solid rgba(193, 199, 203, 0.15);
+  }
+
+
+  /* Surface tint shift on hover */
+  .hover-surface-shift {
+    transition: background-color 0.2s ease;
+  }
+  .hover-surface-shift:hover {
+    background-color: var(--surface-container-high);
+  }
+
+  /* Uppercase label style */
+  .label-caps {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+  }
+  .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
+
+  /* No visible borders utility */
+  .border-none-visual {
+    border-color: transparent !important;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+  }
+  .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
+}

@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Keranjang Belanja" %} | SBN Store{% endblock %}
+
+{% block content %}
+<style>
+    input[type="checkbox"] {
+        accent-color: #3498db;
+    }
+</style>
+<div class="mb-12">
+    <h1 class="text-4xl font-extrabold  text-on-surface mb-2">{% trans "Keranjang Belanja" %}</h1>
+    <p class="text-on-surface-variant max-w-xl">
+        {% trans "Tinjau pilihan Anda sebelum melanjutkan ke proses pembayaran." %}
+    </p>
+</div>
+
+{% if items %}
+<div id="cart-container" class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+    <!-- Cart Items -->
+    <div class="lg:col-span-8 space-y-10">
+        <!-- Check all -->
+        <div class="flex items-center gap-3 pb-4 border-b border-outline-variant/20">
+            <input type="checkbox" id="check-all"
+                class="w-4 h-4 md:w-5 md:h-5 text-primary accent-primary rounded border-outline-variant/50 focus:ring-primary cursor-pointer"
+                checked>
+            <label for="check-all" class="font-bold text-on-surface select-none cursor-pointer">
+                {% trans "Pilih Semua" %}
+            </label>
+        </div>
+
+        {% for item in items %}
+        <div class="flex flex-row gap-4 md:gap-6 items-center group">
+            <div class="flex-shrink-0">
+                <input type="checkbox" name="selected_items" value="{{ item.id }}" data-price="{{ item.get_subtotal }}"
+                    class="item-checkbox w-4 h-4 md:w-5 md:h-5 text-primary accent-primary rounded border-outline-variant/50 focus:ring-primary cursor-pointer"
+                    checked>
+            </div>
+            <div
+                class="cart-image-container w-20 h-20 md:w-48 md:h-48 bg-surface-container-highest overflow-hidden rounded-xl flex-shrink-0">
+                {% if item.furniture.thumbnail %}
+                <a href="{% url 'furniture_detail' item.furniture.pk %}">
+                    <img src="{{ item.furniture.thumbnail.url }}" alt="{{ item.furniture.name }}"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                </a>
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center text-on-surface/15">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5" />
+                    </svg>
+                </div>
+                {% endif %}
+            </div>
+            <div class="flex-1 space-y-2 md:space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary mb-1 block">
+                            {{ item.furniture.category.name }}</span>
+                        <a href="{% url 'furniture_detail' item.furniture.pk %}"
+                            class="hover:text-secondary transition-colors">
+                            <h3 class="text-base md:text-xl font-bold text-on-surface">{{ item.furniture.name }}</h3>
+                        </a>
+                        {% if item.variant %}
+                        <p class="text-sm text-on-surface-variant mt-0.5">{% trans "Varian:" %} {{ item.variant.name }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm md:text-lg font-bold text-primary">{{ item.furniture.formatted_price }}</p>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 md:pt-4">
+                    <form method="POST" action="{% url 'update_cart' item.id %}"
+                        class="flex items-center bg-surface-container-low rounded-full px-1 py-0.5 md:px-2 md:py-1 w-fit">
+                        {% csrf_token %}
+                        <button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}"
+                            class="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-primary hover:bg-surface-container-high rounded-full transition-colors font-bold text-xs md:text-sm">−</button>
+                        <span class="px-2 md:px-4 font-semibold text-xs md:text-sm">{{ item.quantity }}</span>
+                        <button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}"
+                            class="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-primary hover:bg-surface-container-high rounded-full transition-colors font-bold text-xs md:text-sm">+</button>
+                    </form>
+                    <div class="flex items-center justify-between md:justify-end gap-6">
+                        <span class="text-sm md:text-lg font-bold text-on-surface">{{ item.formatted_subtotal }}</span>
+                        <form method="POST" action="{% url 'remove_from_cart' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="flex items-center text-sm text-outline hover:text-error transition-colors gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                {% trans "Hapus" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Order Summary -->
+    <div class="lg:col-span-4">
+        <div class="sticky top-28 space-y-8">
+            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/15">
+                <h2 class="text-xl font-bold mb-8">{% trans "Ringkasan Pesanan" %}</h2>
+                <div class="space-y-4 mb-8">
+                    {% for item in items %}
+                    <div class="flex justify-between text-on-surface-variant text-sm">
+                        <span class="truncate max-w-[180px]">{{ item.furniture.name }} ×{{ item.quantity }}</span>
+                        <span class="font-medium text-on-surface">{{ item.formatted_subtotal }}</span>
+                    </div>
+                    {% endfor %}
+                    <div class="pt-4 border-t border-outline-variant/10 flex justify-between items-end">
+                        <span class="text-lg font-bold">{% trans "Total" %}</span>
+                        <span id="cart-total" class="text-2xl font-extrabold text-primary">{{ cart.formatted_total
+                            }}</span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <button type="submit" id="checkout-btn"
+                        class="block w-full text-center bg-primary text-white hover:bg-opacity-90 py-4 rounded-xl font-bold text-sm tracking-wide transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                        {% trans "Lanjut ke Checkout" %}
+                    </button>
+                    <a href="{% url 'collection' %}"
+                        class="block w-full text-center text-sm text-on-surface-variant hover:text-secondary transition-colors font-medium">
+                        {% trans "Lanjut Belanja" %}
+                    </a>
+                </div>
+            </div>
+            <!-- Trust Badges -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl">
+                    <div
+                        class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary shadow-sm flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-primary">{% trans "Transaksi Aman" %}
+                        </p>
+                        <p class="text-[10px] text-on-surface-variant leading-tight">
+                            {% trans "Pembayaran terenkripsi & terlindungi" %}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl">
+                    <div
+                        class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary shadow-sm flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-primary">{% trans "Pengiriman Aman" %}
+                        </p>
+                        <p class="text-[10px] text-on-surface-variant leading-tight">
+                            {% trans "Pengemasan premium untuk setiap produk" %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkAll = document.getElementById('check-all');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        const cartTotalEl = document.getElementById('cart-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+
+        function formatRupiah(number) {
+            return 'Rp ' + number.toLocaleString('id-ID', { minimumFractionDigits: 0 }).replace(/,/g, '.');
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            let checkedCount = 0;
+            itemCheckboxes.forEach(cb => {
+                if (cb.checked) {
+                    total += parseInt(cb.getAttribute('data-price') || 0);
+                    checkedCount++;
+                }
+            });
+            cartTotalEl.textContent = formatRupiah(total);
+
+            // Update check all state
+            if (checkAll) {
+                if (checkedCount === itemCheckboxes.length && itemCheckboxes.length > 0) {
+                    checkAll.checked = true;
+                    checkAll.indeterminate = false;
+                } else if (checkedCount === 0) {
+                    checkAll.checked = false;
+                    checkAll.indeterminate = false;
+                } else {
+                    checkAll.checked = false;
+                    checkAll.indeterminate = true;
+                }
+            }
+
+            // Enable/disable checkout button
+            if (checkoutBtn) {
+                checkoutBtn.disabled = (checkedCount === 0);
+            }
+        }
+
+        if (checkAll) {
+            checkAll.addEventListener('change', function () {
+                const isChecked = this.checked;
+                itemCheckboxes.forEach(cb => {
+                    cb.checked = isChecked;
+                });
+                calculateTotal();
+            });
+        }
+
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener('change', calculateTotal);
+        });
+
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked')).map(cb => cb.value);
+                if (selectedIds.length > 0) {
+                    const baseUrl = "{% url 'checkout' %}";
+                    const params = selectedIds.map(id => `selected_items=${id}`).join('&');
+                    window.location.href = `${baseUrl}?${params}`;
+                }
+            });
+
+            // Initial state
+            calculateTotal();
+        }
+    });
+</script>
+
+{% else %}
+<div class="text-center py-24">
+    <svg class="w-16 h-16 mx-auto text-on-surface/10 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+    <h2 class="text-2xl font-bold text-on-surface mb-2">{% trans "Keranjang masih kosong" %}</h2>
+    <p class="text-on-surface-variant mb-8">{% trans "Yuk, tambahkan produk yang Anda suka!" %}</p>
+    <a href="{% url 'collection' %}"
+        class="inline-block bg-primary text-white hover:bg-opacity-90 font-bold py-3 px-8 rounded-xl hover:shadow-lg transition-all text-sm tracking-wide">
+        {% trans "Lihat Koleksi" %}
+    </a>
+</div>
+{% endif %}
+{% endblock %}

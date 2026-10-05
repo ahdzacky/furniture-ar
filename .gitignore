@@ -1,0 +1,11 @@
+ignored_assets/
+.venv/
+venv/
+db.sqlite3
+__pycache__/
+*.pyc
+.env
+node_modules/
+report/
+.DS_Store
+.vscode/

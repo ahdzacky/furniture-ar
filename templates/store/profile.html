@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Profil Saya" %} | SBN Store{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-primary tracking-tight">{% trans "Profil Saya" %}</h1>
+            <p class="text-on-surface/50 mt-2">{% trans "Kelola informasi data diri dan alamat pengiriman Anda." %}</p>
+        </div>
+        <a href="{% url 'password_change' %}" class="inline-flex items-center gap-2 bg-surface-container-high hover:bg-slate-200 text-on-surface/70 font-semibold py-2.5 px-4 rounded-xl transition-all text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            {% trans "Ganti Kata Sandi" %}
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-3">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-100{% elif message.tags == 'error' %}bg-red-50 text-red-700 border border-red-100{% else %}bg-blue-50 text-blue-700 border border-blue-100{% endif %} flex items-start gap-3">
+            {% if message.tags == 'success' %}
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            {% else %}
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            {% endif %}
+            <p>{{ message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card-elevated p-8">
+        <form method="POST" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Biodata Section -->
+            <div>
+                <h2 class="text-xl font-bold text-on-surface mb-4 pb-2 border-b border-surface-container-high">{% trans "Biodata" %}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {% for field in user_form %}
+                    <div class="{% if field.name == 'email' %}md:col-span-2{% endif %}">
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.phone.label }}</label>
+                        {{ profile_form.phone }}
+                        {% if profile_form.phone.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Section -->
+            <div>
+                <h2 class="text-xl font-bold text-on-surface mb-4 pb-2 border-b border-surface-container-high">{% trans "Alamat Pengiriman Default" %}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.address.label }}</label>
+                        {{ profile_form.address }}
+                        {% if profile_form.address.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.province.label }}</label>
+                        {{ profile_form.province }}
+                        {% if profile_form.province.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.province.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.city.label }}</label>
+                        {{ profile_form.city }}
+                        {% if profile_form.city.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.city.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.district.label }}</label>
+                        {{ profile_form.district }}
+                        {% if profile_form.district.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.district.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.village.label }}</label>
+                        {{ profile_form.village }}
+                        {% if profile_form.village.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.village.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-on-surface/70 mb-1.5">{{ profile_form.postal_code.label }}</label>
+                        {{ profile_form.postal_code }}
+                        {% if profile_form.postal_code.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ profile_form.postal_code.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+                <button type="submit" class="bg-primary text-white rounded-xl hover:bg-opacity-90 transition-all py-3 px-4 shadow-sm">
+                    {% trans "Simpan Perubahan" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const provinceSel = document.getElementById('id_province');
+    const citySel = document.getElementById('id_city');
+    const districtSel = document.getElementById('id_district');
+    const villageSel = document.getElementById('id_village');
+    
+    if(!provinceSel || !citySel || !districtSel || !villageSel) return;
+
+    const API_BASE = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+
+    function toTitleCase(str) {
+        if (!str) return '';
+        str = str.replace(/B A T A M/ig, 'BATAM');
+        return str.toLowerCase().split(' ').map(function(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
+    }
+
+    function fetchAndPopulate(url, selectElement, defaultText, callback) {
+        selectElement.innerHTML = `<option value="">Memuat...</option>`;
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+                const initialVal = selectElement.getAttribute('data-initial') || '';
+                let foundMatch = null;
+                data.forEach(item => {
+                    const opt = document.createElement('option');
+                    const titleName = toTitleCase(item.name);
+                    opt.value = titleName;
+                    opt.setAttribute('data-id', item.id);
+                    opt.textContent = titleName;
+                    if(titleName.toUpperCase() === initialVal.toUpperCase()) {
+                        opt.selected = true;
+                        foundMatch = item;
+                    }
+                    selectElement.appendChild(opt);
+                });
+                if(callback && foundMatch) {
+                    callback(foundMatch.id);
+                }
+            })
+            .catch(err => {
+                selectElement.innerHTML = `<option value="">Gagal memuat data</option>`;
+                console.error(err);
+            });
+    }
+
+    // Handlers
+    provinceSel.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const id = opt ? opt.getAttribute('data-id') : null;
+        citySel.innerHTML = `<option value="">Pilih Kota/Kabupaten...</option>`;
+        districtSel.innerHTML = `<option value="">Pilih Kecamatan...</option>`;
+        villageSel.innerHTML = `<option value="">Pilih Kelurahan/Desa...</option>`;
+        if(id) {
+            fetchAndPopulate(`${API_BASE}/regencies/${id}.json`, citySel, 'Pilih Kota/Kabupaten...');
+        }
+    });
+
+    citySel.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const id = opt ? opt.getAttribute('data-id') : null;
+        districtSel.innerHTML = `<option value="">Pilih Kecamatan...</option>`;
+        villageSel.innerHTML = `<option value="">Pilih Kelurahan/Desa...</option>`;
+        if(id) {
+            fetchAndPopulate(`${API_BASE}/districts/${id}.json`, districtSel, 'Pilih Kecamatan...');
+        }
+    });
+
+    districtSel.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const id = opt ? opt.getAttribute('data-id') : null;
+        villageSel.innerHTML = `<option value="">Pilih Kelurahan/Desa...</option>`;
+        if(id) {
+            fetchAndPopulate(`${API_BASE}/villages/${id}.json`, villageSel, 'Pilih Kelurahan/Desa...');
+        }
+    });
+
+    // Initial Load - Provinces
+    fetchAndPopulate(`${API_BASE}/provinces.json`, provinceSel, 'Pilih Provinsi...', function(provId) {
+        if(citySel.getAttribute('data-initial')) {
+            fetchAndPopulate(`${API_BASE}/regencies/${provId}.json`, citySel, 'Pilih Kota/Kabupaten...', function(cityId) {
+                if(districtSel.getAttribute('data-initial')) {
+                    fetchAndPopulate(`${API_BASE}/districts/${cityId}.json`, districtSel, 'Pilih Kecamatan...', function(distId) {
+                        if(villageSel.getAttribute('data-initial')) {
+                            fetchAndPopulate(`${API_BASE}/villages/${distId}.json`, villageSel, 'Pilih Kelurahan/Desa...');
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
